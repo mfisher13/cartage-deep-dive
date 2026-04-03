@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cartage Intelligence Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>🚛 Cartage Intelligence Dashboard</h2>
+
+<form method="post" enctype="multipart/form-data">
+    Upload CSVs: <input type="file" name="files" multiple><br><br>
+    Wage: <input type="number" name="wage" value="25"><br>
+    Truck Cost: <input type="number" name="truck_cost" value="400"><br>
+    Stop Time: <input type="number" name="stop_time" value="15"><br><br>
+    <button type="submit">Analyze</button>
+</form>
+
+<hr>
+
+{% if kpis %}
+<h3>📊 KPIs</h3>
+<p>
+Total Weight: {{ kpis.total_weight }} |
+Total Cost: ${{ kpis.total_cost }} |
+Avg Cost/LB: {{ kpis.avg_cost_lb }} |
+Stops: {{ kpis.total_stops }} |
+Savings: ${{ kpis.total_savings }}
+</p>
+{% endif %}
+
+{% if trend %}
+<h3>📈 Cost per LB Trend</h3>
+<canvas id="trendChart"></canvas>
+
+<script>
+const trendData = {{ trend | tojson }};
+const labels = trendData.map(x => x.Date);
+const values = trendData.map(x => x["Cost/LB"]);
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Cost per LB',
+            data: values
+        }]
+    }
+});
+</script>
+{% endif %}
+
+{% if drivers %}
+<h3>👨‍✈️ Driver Scorecard</h3>
+<table border="1">
+<tr>
+<th>Driver</th>
+<th>Weight</th>
+<th>Cost</th>
+<th>Stops</th>
+<th>Cost/LB</th>
+<th>Time Saved</th>
+</tr>
+
+{% for d in drivers %}
+<tr>
+<td>{{ d.Driver }}</td>
+<td>{{ d.Weight }}</td>
+<td>{{ d.Cost }}</td>
+<td>{{ d.Stops }}</td>
+<td>{{ d["Cost/LB"] }}</td>
+<td>{{ d["Time Saved"] }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% if results %}
+<h3>📋 Route Detail</h3>
+<table border="1">
+<tr>
+<th>Driver</th>
+<th>Date</th>
+<th>Stops</th>
+<th>Weight</th>
+<th>Cost</th>
+<th>Cost/LB</th>
+<th>Time Saved</th>
+</tr>
+
+{% for row in results %}
+<tr>
+<td>{{ row.Driver }}</td>
+<td>{{ row.Date }}</td>
+<td>{{ row.Stops }}</td>
+<td>{{ row.Weight }}</td>
+<td>{{ row.Cost }}</td>
+<td>{{ row["Cost/LB"] }}</td>
+<td>{{ row["Time Saved"] }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+</body>
+</html>
